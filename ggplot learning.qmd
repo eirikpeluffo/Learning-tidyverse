@@ -15,7 +15,8 @@ ggplot(
   data = penguins,
   mapping = aes(x = flipper_length_mm, y = body_mass_g)
 ) +
-  geom_point(mapping = aes(color = species,  shape = species)) + geom_smooth(method = "lm") + 
+  geom_point(mapping = aes(color = species,  shape = species, na.rm = TRUE)) + 
+  geom_smooth(method = "lm", na.rm = TRUE) + 
   labs(
     title = "body mass and flipper length",
     subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
@@ -26,7 +27,7 @@ ggplot(
   scale_color_colorblind()
 
 #answer to the task 1.2.5 Exercises How many rows are in penguins? How many columns?
-dim(penguins) 
+#dim(penguins) 
 
 #task 2: What does the bill_depth_mm variable in the penguins data frame describe? 
 #?penguins
@@ -38,16 +39,54 @@ ggplot(
   data = penguins,
   mapping = aes(x = bill_length_mm , y = bill_depth_mm )
   ) + 
-  geom_point(mapping = aes(color = species, shape = species)) + 
-  geom_smooth(method = "lm") +
+  geom_point(mapping = aes(color = species, shape = species), na.rm = TRUE) + 
+  geom_smooth(method = "lm", na.rm = TRUE) +
   scale_color_colorblind()
 #here the relationsip is positive between the groups/species individually, but when they are grouped together we see that the relationship is negative. the simpson paradow, where the groups are positive indiviudally, but when we look at them together, the trend is opposite. this comes from a omitted variable (species) that affect both x and y isnt accounted for and makes misguiding results.
 
 #task 4 scatterplot of species and bill_depth_mm
 ggplot(data =  penguins,
-       aes(species,bill_depth_mm)) + 
-  geom_jitter(width = 0.35)
+       aes(species,bill_depth_mm, color = species)) + 
+  geom_jitter(width = 0.35, na.rm = TRUE) +
+  labs(
+  title = "Data come from the palmerpenguins package.”",
+  subtitle = "this is my task",
+  x = "species",
+  y = "bill depth (mm)",
+  color = "Species") #the labs is task 7 and the na.rm = TRUE is task 6
+
+#task 8 
+ggplot(data = penguins,
+       aes(flipper_length_mm, body_mass_g, color = bill_depth_mm)) + 
+  geom_point(na.rm = TRUE) +
+  geom_smooth(na.rm = TRUE) 
 
 
 
+```
+
+### **Exercises**1.4.3
+
+```{r}
+library(tidyverse)
+library(palmerpenguins)
+library(ggthemes)
+
+#Make a bar plot of species of penguins, where you assign species to the y aesthetic. How is this plot different?
+ggplot(penguins,
+       aes(y = species, fill = species)) + 
+  geom_bar() #here i used fill instead of color to make the bars be colored, not just the outline.
+
+#What does the bins argument in geom_histogram() do?
+
+ggplot(penguins,
+       aes(bill_length_mm, fill = species)) +
+  geom_histogram(bins = 60) 
+
+
+#task 4
+data("diamonds")
+names(diamonds)
+ggplot(diamonds, aes(carat, fill = cut)) +
+  geom_histogram(binwidth = 0.01)
 ```
