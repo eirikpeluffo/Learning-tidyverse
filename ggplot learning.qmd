@@ -1,0 +1,13 @@
+---
+title: "01-ggplot.qmd"
+format: html
+editor: visual
+---
+
+# ggplot and learning R studios
+
+```{r}
+library(tidyverse)
+data("starwars")
+head(starwars)
+```
