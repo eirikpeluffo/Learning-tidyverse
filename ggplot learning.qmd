@@ -8,6 +8,46 @@ editor: visual
 
 ```{r}
 library(tidyverse)
-data("starwars")
-head(starwars)
+library(palmerpenguins)
+library(ggthemes)
+
+ggplot(
+  data = penguins,
+  mapping = aes(x = flipper_length_mm, y = body_mass_g)
+) +
+  geom_point(mapping = aes(color = species,  shape = species)) + geom_smooth(method = "lm") + 
+  labs(
+    title = "body mass and flipper length",
+    subtitle = "Dimensions for Adelie, Chinstrap, and Gentoo Penguins",
+    x = "flipper length (mm)", 
+    y = "body mass (g)",
+    color = "species", shape = "species"
+  ) + 
+  scale_color_colorblind()
+
+#answer to the task 1.2.5 Exercises How many rows are in penguins? How many columns?
+dim(penguins) 
+
+#task 2: What does the bill_depth_mm variable in the penguins data frame describe? 
+#?penguins
+#a number denoting bill depth (millimeters)
+
+#task 3
+# Make a scatterplot of bill_depth_mm vs. bill_length_mm. That is, make a scatterplot with bill_depth_mm on the y-axis and bill_length_mm on the x-axis. Describe the relationship between these two variables.
+ggplot(
+  data = penguins,
+  mapping = aes(x = bill_length_mm , y = bill_depth_mm )
+  ) + 
+  geom_point(mapping = aes(color = species, shape = species)) + 
+  geom_smooth(method = "lm") +
+  scale_color_colorblind()
+#here the relationsip is positive between the groups/species individually, but when they are grouped together we see that the relationship is negative. the simpson paradow, where the groups are positive indiviudally, but when we look at them together, the trend is opposite. this comes from a omitted variable (species) that affect both x and y isnt accounted for and makes misguiding results.
+
+#task 4 scatterplot of species and bill_depth_mm
+ggplot(data =  penguins,
+       aes(species,bill_depth_mm)) + 
+  geom_jitter(width = 0.35)
+
+
+
 ```
