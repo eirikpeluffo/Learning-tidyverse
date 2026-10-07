@@ -1,0 +1,124 @@
+---
+title: "Chapter 5 Data tidying"
+format: html
+editor: visual
+---
+
+## Chapter 5
+
+```{r}
+library(tidyverse)
+# There are three interrelated rules that make a dataset tidy:
+#   
+# Each variable is a column; each column is a variable.
+# Each observation is a row; each row is an observation.
+# Each value is a cell; each cell is a single value.
+#task 1
+# 
+# table1 |>
+#   mutate(rate = cases / population * 10000)
+#this shows the variables in the columns and the observations in the rows with values in each cell. mutate here adds a new column with rate which is an expression of cases / population *10000
+
+#task 2
+#in table to the variables are in the rows, and this make the table messy. 
+
+#here i need to learn the pivot_wider() so i can avoid manually filter/select approach. 
+
+  
+  
+#to types of piwot
+#piwot_longer
+
+billborard_longer <- billboard |> 
+  pivot_longer(
+    cols = starts_with("wk"), #cols specify which column needs to be pivoted. use the same syntax as select()
+    names_to = "week", #names the variables stored in the column names.
+    values_to = "rank", #names the variable stored in the cell values.
+    values_drop_na = TRUE ) |> 
+  #now the rows with NA is dropped.
+   #so the names from the column are placed in a new column where the assigned name from the previous column is now the value/string. Next creating a new column with rank that is the value from the previously column now placed in rank accordingly to the column it previously belonged to.
+  
+  mutate(week = parse_number(week) )
+#parse_number
+# this is a function that will extract the first number from a string, ignoring all other text, so in this example when the string is wknjumbers, the parse_number removes the wk string part, and we end up with only 1,2,3,4, accordingly. important to do this in a mutate to make overriding column from the old one. 
+
+# a plot from this:
+billborard_longer |> 
+  ggplot(aes(week, rank, group = track)) + #group draws one line per song. tells ggplot wich points belong together. 
+  geom_line(alpha = 0.25) + #alpha = sets transperancy 0-1
+  scale_y_reverse() #this turns the y upside down, so 0 is at the top.
+
+
+
+  
+```
+
+### **5.3.2 How does pivoting work?**
+
+```{r}
+# df <- tribble(
+#   ~id,  ~bp1, ~bp2,
+#   "A",  100,  120,
+#   "B",  140,  115,
+#   "C",  120,  125
+# )
+# #we want to change this so we can have type of bp in one column, and the corresponding value in the other column.
+# df_longer <- df |>
+#   pivot_longer(
+#     cols = bp1:bp2,
+#     names_to = "measurment",
+#     values_to = "value"
+#   )
+# df_longer
+# #this makes the names of the columns go into the measurment column. and the values from the column goes into a new column called value.
+# 
+# 
+# 
+# #5.3.3 Many variables in column names
+# 
+# # here the goal is to categorize by extracting the different string variables "hidden" in the names. we already have some colmns we are satisfied with, so we need to make a point of not including them.
+# who2 |>
+#   pivot_longer(
+#     cols = !(country:year),
+#   names_to = c("diagnosis", "gender", "age_range"), #here we seperate the three different values into columns with assigned names. the order they are in decideds where the different strings/values are assigned.
+#   names_sep = "_",#this says what should seperate the different values so that they can be sorted into to columns
+#   values_to = "count" #count is the name of the column and the values from the earlier name is assigned here.
+# )
+# 
+# 
+# #5.3.4 Data and variable names in the column headers
+# household |>
+#   pivot_longer(
+#     cols = !family, #not to include family
+#     # names_to = c(".value", "child"), #here the .value tells the function to override the usual values_to argument, and instead use the first component as the variable name.
+#     names_sep = "_",
+#     values_drop_na = TRUE
+#   )
+# 
+
+```
+
+### Widening data
+
+```{r}
+#Here pivot_wider() is the relevant function. This makes dataset wider by increasing columns and reducing rows. this is helpfull when one observation is spread across multiple rows. 
+
+cms_patient_experience |> 
+  distinct(measure_cd, measure_title) #this is to see the complete set of values. we now can see all the different strings of cd and the title.
+#we take fromn this that none of the strings are good names for columns.
+#pivot_wider() has the opposite interface to pivot_longer(): instead of choosing new column names, i need to provide the existing columns that define the values (values_from) and the column name (names_from):
+
+cms_patient_experience |> 
+  pivot_wider(
+    id_cols = starts_with("org"), #this says which column identifies a row in the result. here this is columns that starts with org.
+    names_from = measure_cd, #this takes the names for the columns from the measure_cd column and sorts the data into unique columns based on the strings in the measure_cd column.
+    values_from = prf_rate #this assignes the values from prf_rate into the new columns.
+
+  )
+
+
+
+
+
+
+```
