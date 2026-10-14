@@ -1,0 +1,211 @@
+---
+title: "Chapter 9 Layers"
+format: html
+editor: visual
+---
+
+## Chapter 9
+
+```{r}
+library(tidyverse)
+
+mpg |> 
+  ggplot(aes(displ,hwy,color = class, shape = class)) + 
+  geom_point( color = "blue", size = 3)  #writing outside the ggplot(aes()) makes the command apply for every point in the graph. 
+```
+
+## Exercises
+
+```{r}
+#Create a scatterplot of hwy vs. displ where the points are pink filled in triangles.
+mpg |> 
+  ggplot(aes(hwy, displ)) + 
+  geom_point(color = "deeppink", shape = 17, size = 3)
+
+#task 2. the points are not filled in blue since the color = is inside the aes function, and this needs command for color = one of the columns. to fix this put color in the geom_point part. 
+
+#task 3. stroke sets the thickness of the outline of the shapes
+
+#What happens if you map an aesthetic to something other than a variable name, like aes(color = displ < 5)? 
+#here the color will grade depending on true or false values. one color for < 5 and one for >5. this works for any calculations, and works similar as doing a mutate to create a new column and then assign colors depending on the values.
+```
+
+## Exercises 9.3.1
+
+```{r}
+#What geom would you use to draw a line chart? A boxplot? A histogram? An area chart?
+#line chart = geom_line
+#boxplot = geom_boxplot
+#histogram = geom_histogram
+#area chart = geom_area
+
+#task 2
+#show.legend =  false makes the box that shows what colomn values are assigned the specific color or shape etc disappear. the explanation box disappears. 
+
+#task 3
+#What does the se argument to geom_smooth() do?
+#se decides if the confidence interval grey area around the curve is showing or not. se= FALSE removes it. 
+
+#Task 4
+
+mpg |>  #graph 1
+  ggplot(aes(displ, hwy)) +
+  geom_smooth(color = "blue", se = FALSE)+ geom_point(color = "black", size = 5)
+
+#graph 2
+mpg |> 
+  ggplot(aes(displ, hwy, shape = drv)) +
+  geom_smooth(color= "darkblue", se = FALSE) + geom_point(color = "black", shape = 19, size=3)
+
+#graph 3
+mpg |> 
+  ggplot(aes(displ, hwy, shape = drv, color = drv)) +
+  geom_smooth( se = FALSE) + geom_point( shape = 19, size=3)
+
+# graph 4
+mpg |> 
+  ggplot(aes(displ, hwy, color = drv)) +
+  geom_smooth(se = FALSE, color = "darkblue", size = 2) + geom_point( shape = 19, size=3)
+
+#graph 5
+mpg |> 
+  ggplot(aes(displ,hwy, color = drv)) + geom_smooth(se = FALSE, aes( linetype = drv), color = "blue", size = 1.5) + geom_point()
+
+#graph 6 
+mpg |> 
+  ggplot(aes(displ,hwy, color = drv)) +  
+  geom_point(size = 5, color = "white") +geom_point(size = 3, aes(color = drv)) 
+#here i put two points over eachother to make the illusion of glowing pounts by making larger white points, then i put the colored ones over the white ones. the order of the goem_points matter for if the points are over or under the other ones. 
+
+
+```
+
+### Facets
+
+```{r}
+library(tidyverse)
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  facet_wrap(~cyl) #here the landa cyl splits a plot into subplots that each display one subset of the data based on a categorial variable. 
+#to make displays that combines two variables i have to use facet_grid(), with x¨~ y inside the parameters. 
+ggplot(mpg, aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  facet_grid(drv ~ cyl)
+#scales = "free" lets each facet panel have its own x- and y-axis range, fitted to the data in that panel. E.g. if one panel only has x values between 1 and 20 while another goes up to 100, the first panel zooms in on 1–20 instead of using the shared 1–100 range. This makes patterns within each panel easier to see, but makes comparing values across panels harder.
+
+```
+
+### Exercises
+
+bo
+
+```{r}
+library(tidyverse)
+#Task 1
+# What happens if you facet on a continuous variable?
+#there will be a diagram for each variable thus having the potential to make a lot of diagrams. A way to solve this is to use cut_width() or cut_number()
+#task 3 
+ggplot(mpg) + 
+  geom_point(aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)d
+#here the drv~. makes it so that it is only variable, making it like facet_wrap, but it behaves as facet_grid. gives a single column on the right side. and if it was the other way around the columns would appear on the top side. 
+
+#task 4
+#the advantage of faceting is that each group gets its own panel, so no overlapping points. disadvantage is that it makes it harder to compare.
+
+#task 5
+#What does nrow do? What does ncol do? What other options control the layout of the individual panels? Why doesn’t facet_grid() have nrow and ncol arguments?
+#nrow = sets how many rows facet_wrap uses and ncol sets how many column facet_wrap uses. 
+#as.table = if TRUE the highest values goes bottom right like a table. if FALSE it goes top right like a plot axis
+#dir = decides the direction the paneles are filled in. h = horizontal and v = vertical
+#strip.position = where the panels share axes ("fixed", "free", "free_x", "free_y")
+#labeller = decides how the panel labels are written. 
+
+#task 6
+# The first plot (drv ~ .) makes it easier to compare engine size across drive types, because the panels are stacked and share a vertically aligned x-axis.
+# In general: stack panels to compare x-values, place them side by side to compare y-values.
+```
+
+## **9.5 Statistical transformations**
+
+```{r}
+ggplot(diamonds, aes(x = cut, y = "count")) + 
+  geom_bar(stat = "identity") #stat = makes each bar have a label of the qualoty on the diamonds. 
+
+#here we see that count appears when using geom_bar. It shows the number of points that fall in each bin / bar
+ggplot(diamonds) + 
+  stat_summary( #adds a layer that summarizes for each x group and plot those. 
+    aes(x = cut, y = depth), #this loads the variables into the plot
+    fun.min = min, #sets the bottom of the vertical line to the smallest depth value in the group.
+    fun.max = max,#sets the top of the vertical line to the largest depth value in each group
+    fun = median #sets the point to the median of the depth in each group
+  )
+
+
+```
+
+### **9.5.1 Exercises**
+
+```{r}
+#What is the default geom associated with stat_summary()? How could you rewrite the previous plot to use that geom function instead of the stat function?
+# The default geom of stat_summary() is geom_pointrange(). The plot can be rewritten with geom_pointrange() by setting stat = "summary" and passing the same fun, fun.min and fun.max arguments.
+
+#Task 2
+# geom_bar() when you have raw data and want to count how many rows fall in each category.
+#geom_col() when you already have the numbers you want to show, e.g. average price per cut or GDP per country
+
+#task 3
+# Most geoms and stats come in pairs that are almost always used in concert. What do they have in common
+#the stat part is to compute the data and the geom part is to visualize it. can find the list by typing ?geom_ or search for it online.
+#the stat decides what is shown, and the geom decides how it looks.
+
+#task 4
+#What variables ddoes geom_smooth compute?
+#shows the estimated average of y at all indiviudal levels of x and then makes a grey area that show the confidence interval of the given y value at the given x value. the confidence interval shows where the true average value lies, and with many data points, the CI will shrink.
+#the main argument that controls geom_smoot is stat_smooth
+
+#task 5
+#In our proportion bar chart, we needed to set group = 1. Why?
+#the reason for this is that group = 1 puts all the bars in the same group, meaning that the porpotion of the height is calculated by the total count and not categpry/category, instead is category / sum of all categories counts, thus showing the ratio. Without group = 1, each category is its own group. it goes inside the aes since its a part of the aesthetic. 
+```
+
+### Position adjustment
+
+```{r}
+# position = "fill" works like stacking, but makes each set of stacked bars the same height. This makes it easier to compare proportions across groups.
+# position = "dodge" places overlapping objects directly beside one another. This makes it easier to compare individual values.
+#position = "identity" will place each object exactly where it falls in the context of the graph. This is not very useful for bars, because it overlaps them. To see that overlapping we either need to make the bars slightly transparent by setting alpha to a small value, or completely transparent by setting fill = NA.
+#often when doing a scatterplot many of the points will be in the same position, thus making it appear that there are less points then it is. to avoid this, one can use position = "jitter" inside the geom, to add some random noise for all the values, thus making the points not overlap eachother. can also just add + geom_jitte
+```
+
+### **9.6.1 Exercises**
+
+```{r}
+#task 1
+ggplot(mpg, aes(x = cty, y = hwy)) +
+  geom_jitter()
+#here i fixed the previously code that had geom_point() with a lot of overplotting since the cars had rounded out values. 
+
+#task 2
+#What, if anything, is the difference between the two plots? Why?
+#   ggplot(mpg, aes(x = displ, y = hwy)) +
+#   geom_point()
+# ggplot(mpg, aes(x = displ, y = hwy)) +
+#   geom_point(position = "identity")
+#here there is no difference since position = "identity" is already integrated in the geom_point. identity means the points is placed at the exact x and y values with no adjustment. 
+#Task 3
+# What parameters to geom_jitter() control the amount of jittering?
+#there are two parametes width and height describing how far the variables can be shifted horizontaly(width) and vertically (height) can aslo set them = 0 to make it not move the direction you dont want it to move.
+
+#task 4
+#Compare and contrast geom_jitter() with geom_count().
+# geom_count() keeps the points at their exact positions and counts how many observations share each location, then makes the point bigger the more observations there are (it uses stat_sum()).
+#When to use which: geom_count() when values are discrete or rounded and you want to show how many are at each spot; geom_jitter() when you want to see each observation and small shifts don’t matter.
+
+#task 5
+#What’s the default position adjustment for geom_boxplot()?
+#the default postion is made so that the boxplots are places side by side isntead on top of each other. 
+
+
+
+```
